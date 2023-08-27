@@ -73,6 +73,16 @@ class ProductController extends Controller
     public function show(string $id)
     {
         //
+        $product = Product::find($id);
+        if(!$product){
+            return response()->json([
+                'message'=>"Product not found!"
+            ], 404);
+        }
+
+        return response()->json([
+            'product' => $product
+        ], 200);
     }
 
     /**
@@ -86,9 +96,51 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(ProductStoreRequest $request, string $id)
     {
         //
+        try {
+            $product = Product::find($id);
+            if(!$product){
+                return response()->json([
+                    'message'=> 'Product Not Found!'
+                ],400);
+            };
+            
+            $product->name = $request->name;
+            $product->description = $request->description;
+
+
+            if($request->image){
+
+                //public Storage
+                $storage = Storage::disk('public');
+
+                //Old image delete
+
+                if( $storage->exists($product->image))
+                    $storage->delete($product->image);
+                //Image name
+                $imageName = Str::random(32).".".$request->image->getClientOriginalExtension();
+                $product->image = $imageName;
+
+                //image save in public folder
+
+                $storage->put($imageName, file_get_contents($request->image));
+
+            };
+            //Update Product
+            $product->save();
+
+
+            return response() -> json([
+                'message'=> 'Product Update Successfully'
+            ], 200);
+        } catch (\Exception $e){
+            return response()->json([
+                'message'=> 'Update Went Wrong!'
+            ], 500);
+        }
     }
 
     /**
