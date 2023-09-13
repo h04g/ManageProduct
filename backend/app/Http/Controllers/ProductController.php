@@ -155,5 +155,23 @@ class ProductController extends Controller
                 'message'=>'Product not found!!'
             ], 404);
         }
+
+        //Public storage
+        $storage = Storage::disk('public');
+
+
+        //Image delete
+        if($storage->exists($product->image))
+            $storage->delete($product->image);
+
+        //Delete Product
+        $product->delete();
+
+
+        //Return json response
+
+        return response()->json([
+            'message' => "Product Delete Successfully"
+        ], 200);
     }
 }
