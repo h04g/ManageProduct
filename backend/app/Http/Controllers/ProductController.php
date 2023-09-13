@@ -148,6 +148,12 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        //Detail
+        $product = Product::find($id);
+        if(!$product) {
+            return response()->json([
+                'message'=>'Product not found!!'
+            ], 404);
+        }
     }
 }
